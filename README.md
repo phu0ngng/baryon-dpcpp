@@ -90,7 +90,7 @@ todo
 
 ## Reference:
 - [1] P. Nguyen and B. Hörz. *"Performance Optimization of Baryon-block Construction in the Stochastic LapH Method"*. 2022. doi: 10.48550/ARXIV.2211.16278. [https://arxiv.org/abs/2211.16278](https://arxiv.org/abs/2211.16278).
-- [2] C. Morningstar, J. Bulava, J. Foley, K. J. Juge, D. Lenkner, M. Peardon, and C. H. Wong. *“Improved stochastic estimation of quark propagation with Laplacian Heaviside smearing in lattice QCD”*. In: Phys. Rev. D 83 (11 June 2011), p. 114505. doi: 10.1103/ PhysRevD.83.114505. url: https://link.aps.org/doi/10.1103/PhysRevD.83. 114505.
+- [2] C. Morningstar, J. Bulava, J. Foley, K. J. Juge, D. Lenkner, M. Peardon, and C. H. Wong. *“Improved stochastic estimation of quark propagation with Laplacian Heaviside smearing in lattice QCD”*. In: Phys. Rev. D 83 (11 June 2011), p. 114505. doi: 10.1103/ PhysRevD.83.114505. url: https://link.aps.org/doi/10.1103/PhysRevD.83.114505.
 
 
 
