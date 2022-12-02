@@ -15,26 +15,32 @@ The work provides a solid foundation for modern performance-portable implementat
 
 ## Baryon-block construction in the stochastic LapH method
 Baryons (such as the proton and neutron) are hadrons composed of three quarks. The following intermediary equation, which has been adapted from Eq. (23) of [2], is of great importance to construct a baryon block:
+
 $$
 \mathcal{B}^{d_1 d_2 d_3}_{\vec p} = \sum_{\vec x}^{L^3} \mathrm{e}^{-\mathrm{i} \vec p \vec x} \, \sum_{a,b,c} \varepsilon_{abc} \, q^{d_1}_{\vec x a} q'^{d_2}_{\vec x b} q''^{d_3}_{\vec x c}.
 $$
 
  - The $q$, $q'$, and $q''$ represent the complex-based quark fields with an eigendecomposition. 
  - The $a,b,$ and $c$ denote colour indices while $d_1, d_2,$ and $d_3$ are dilution indices of $q$, $q'$, and $q''$, respectively.
- - The $\varepsilon_{abc}$ is the Levi-Civita symbol, which selects the six nonzero contributions to the colour sum according to                                                                                                         $$
+ - The $\varepsilon_{abc}$ is the Levi-Civita symbol, which selects the six nonzero contributions to the colour sum according to   
+
+$$
             \varepsilon_{abc} = \begin{cases}
                 +1 \quad (abc) \in \{(123), (231),(312)\}, \\
                 -1 \quad (abc) \in \{(321), (132),(213)\}, \\
                 \phantom{+}0 \quad \text{otherwise}.
             \end{cases}
 $$
+
 - The $\vec p$ denotes (a set of) three-dimensional momenta, $\vec p = 2\pi / L \vec d$ with an integer vector $\vec d \in \mathbb{Z}^3$.                                                                                               The number of requested momenta is typically much smaller than the number of allowed momenta (e.g.~$33 \ll 64^3$), so that using a fast Fourier transform is not beneficial.
 - The $e^{-\mathrm{i} \vec p \vec x}$ is phase factor and can be computed as $e^{-\mathrm{i} \vec p \vec x} = \cos(\vec p \vec x) - \mathrm{i} \sin(\vec p \vec x)$, for a given momentum $\vec p$ and spatial index $\vec x$.
 
 The quark fields $q, q', q''$ are decomposed in a basis spanned by the $N_\mathrm{ev}$ low-lying eigenvectors of the Laplacian operator in the stochastic LapH method, as
+
 $$
     q_{\vec x a}^d = \sum_{l=1}^{N_\mathrm{ev}} Q_{dl} \phi_{\vec x a}^l.
 $$
+
 - The $q_{\vec x a}^{d}$ presents the quark field with the dilution index $d=1, \dots, N_D$, the colour index $a=1,2,3$, and the spatial index $\vec x$. The dilution range $N_D$ typically has a value of 64.
 - The spatial index $\vec x$ is the 'flattened' one-dimensional index in the lexicographic order of the three-dimensional lattice grids with the range of $L^3$, where $L$ is the one-dimensional lattice size. A typical lattice size nowadays is $64^3$, but there is a pressing need to scale up to $96^3$.
 -  The $\phi$ is the set of $N_\mathrm{ev}$ low-lying eigenvectors of the three-dimensional Laplace operator on a given time slice which depends on the gluon field and hence has to be computed individually for each time slice of a gauge configuration. Due to the underlying physics, $N_\mathrm{ev}$ needs to be scaled proportionally to the spatial volume and is hence dependent on the problem size.
