@@ -1,6 +1,6 @@
 # Porting the Baryon-block Construction in the Stochastic LapH Method to Heterogeneous Systems with DPC++
 
-This repository contains the implementation for my Master's thesis in Computational Science and Engineering at the Technical University of Munich under the supervision of Dr. Ben Hörz  (Intel) and  Prof.  Michael Bader.
+This repository contains the implementation for my Master's thesis in Computational Science and Engineering at the Technical University Munich under the supervision of Dr. Ben Hörz  (Intel) and  Prof.  Michael Bader.
 
 ## Abstract
 Lattice Quantum Chromodynamics (LQCD) is an important workload in particle physics that provides predictions from simulations of the strong interaction in the Standard Model of particle physics. In order to match the precision of experiments and achieve simulation breakthroughs, there is the need to achieve sustained performance in the range of multiple Exaflops. Thus, optimization of all dominant steps in the LQCD workload is needed. This work provides a high-performance implementation of the baryon-block construction, one of the key kernels in the stochastic LapH method, targeting heterogeneous systems.
