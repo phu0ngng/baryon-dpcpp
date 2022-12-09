@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
 
   std::cout << "\n";
 
-  double applyTime, sumTime;
+  double warmUpTime, sumTime;
   std::vector<std::pair<std::string, double>> timeDetail;
 
 #if defined(KERNEL_CPU_OPT) || defined(KERNEL_CPU_REF)
@@ -106,8 +106,8 @@ int main(int argc, char* argv[]) {
   swatch.reset();
   multi4d<cmplx> resultCpuRef(nMom, nDil, nDil, nDil);
   resultCpuRef = kernelCpuRef.apply(coeff1, coeff2, coeff3);
-  applyTime = swatch.time(); 
-  std::cout << "BaryonConstr Time (warm up) = "<< applyTime <<"\n";
+  warmUpTime = kernelCpuRef.getTimings()[1].second;
+  std::cout << "BaryonConstr Time (warm up) = "<< warmUpTime <<"\n";
 
   sumTime = 0.0;
   for (int i = 1; i < REPEAT; i++)
@@ -118,7 +118,9 @@ int main(int argc, char* argv[]) {
     std::cout << "BaryonConstr Time = "<< timeDetail <<"\n";
     sumTime += timeDetail;
   }
-  std::cout << "Average Time = " << sumTime/(REPEAT-1) << "\n" << std::endl;
+  if (sumTime == 0.0) sumTime = warmUpTime;
+  else sumTime /= (REPEAT - 1);
+  std::cout << "Average Time = " << sumTime << "\n" << std::endl;
 #endif
 
 #ifdef KERNEL_CPU_OPT
@@ -132,8 +134,8 @@ int main(int argc, char* argv[]) {
   swatch.reset();
   multi4d<cmplx> resultCpuOpt(nMom, nDil, nDil, nDil);
   resultCpuOpt = kernelCpuOpt.apply(coeff1, coeff2, coeff3);
-  applyTime = swatch.time(); 
-  std::cout << "BaryonConstr Time (warm up) = "<< applyTime <<"\n";
+  warmUpTime = kernelCpuOpt.getTimings()[1].second;
+  std::cout << "BaryonConstr Time (warm up) = "<< warmUpTime <<"\n";
 
   sumTime = 0.0;
   for (int i = 1; i < REPEAT; i++)
@@ -144,7 +146,9 @@ int main(int argc, char* argv[]) {
     std::cout << "BaryonConstr Time = "<< timeDetail <<"\n";
     sumTime += timeDetail;
   }
-  std::cout << "Average Time = " << sumTime/(REPEAT-1) << "\n" << std::endl;
+  if (sumTime == 0.0) sumTime = warmUpTime;
+  else sumTime /= (REPEAT - 1);
+  std::cout << "Average Time = " << sumTime << "\n" << std::endl;
 #endif
 
 #if defined(RESULT_CHECK) && defined(KERNEL_CPU_OPT) && defined(KERNEL_CPU_REF)
@@ -171,13 +175,12 @@ int main(int argc, char* argv[]) {
   kernelDPC.setMomentumSet(momSet);
 
   kernelDPC.readEV(nEv, [&evList](int iEv) -> const LatticeColorVector& { return evList[iEv]; });
-  std::cout << "BaryonKernelDPC++ setup time = "<<swatch.time()<<"\n";
+  std::cout << "BaryonKernelDPC++ setup time = " << swatch.time()<<"\n";
 
-  swatch.reset();
   multi4d<cmplx> resultDPC(nMom, nDil, nDil, nDil);
   resultDPC = kernelDPC.apply(coeff1_dpc, coeff2_dpc, coeff3_dpc, nDil, nDil, nDil);
-  applyTime = swatch.time(); 
-  std::cout << "BaryonConstr Time (warm up) = "<< applyTime <<"\n" << std::endl;
+  warmUpTime = kernelDPC.getTimings()[1].second;
+  std::cout << "BaryonConstr Time (warm up) = " << warmUpTime <<"\n" << std::endl;
   sumTime = 0.0;
   for (int i = 1; i < REPEAT; i++)
   {
@@ -187,7 +190,9 @@ int main(int argc, char* argv[]) {
     std::cout << "BaryonConstr Time = "<< timeDetail <<"\n";
     sumTime += timeDetail;
   }
-  std::cout << "Average Time = " << sumTime/(REPEAT-1) << "\n" << std::endl;
+  if (sumTime == 0.0) sumTime = warmUpTime;
+  else sumTime /= (REPEAT - 1);
+  std::cout << "Average Time = " << sumTime << "\n" << std::endl;
 
   delete[] coeff1_dpc;
   delete[] coeff2_dpc;

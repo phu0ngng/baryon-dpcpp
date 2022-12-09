@@ -1,4 +1,4 @@
-#include "mics.h"
+#include "misc.h"
 
 //  sets  exp(-I*p*x) on each lattice site (slowly)
 void makeMomPhaseField(const Momentum& p,

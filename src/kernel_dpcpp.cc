@@ -66,6 +66,7 @@ void BaryonKernelDPC::setMomentumSet(const std::set<Momentum>& momSet) {
   }
 
   q.memcpy(d_momBuf,  &momBuf[0]   , nMom * nSites * sizeof(cmplx));
+  q.wait();
   delete[] momBuf;
 }
 
