@@ -1,17 +1,18 @@
 #
 #KERNEL_CPU_OPT=1
-KERNEL_CPU_REF=1
+#KERNEL_CPU_REF=1
 KERNEL_DPC=1
-OPENMP=1
+#OPENMP=1
 #
-RESULT_CHECK=1
+#RESULT_CHECK=1
 #REPVEC=1
 
 DPCPP_CXX= dpcpp
 DPCPP_CXXFLAGS= -O3 -std=c++20 -fmax-errors=3 
+DPCPP_CXXFLAGS+= -fsycl -fsycl-targets=spir64_gen -Xs "-device pvc -options -cl-intel-enable-auto-large-GRF-mode"
 DPCPP_CXXFLAGS+= -qmkl
 DPCPP_CXXFLAGS+= -DDP # -DDP for double precision
-#DPCPP_CXXFLAGS+= -DREPEAT=4 # Number of repetitions + 1 warm up
+DPCPP_CXXFLAGS+= -DREPEAT=2 # Number of repetitions + 1 warm up
 
 #DPCPP_CXXFLAGS+= -DDPC_BLOCK_D1=2 -DDPC_BLOCK_D2=2 -DDPC_BLOCK_D3=16
 #DPCPP_CXXFLAGS+= -DCPU_BLOCK_D1=4 -DCPU_BLOCK_D2=8 -DCPU_BLOCK_D3=16 -DCPU_BLOCK_X=32

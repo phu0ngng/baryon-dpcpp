@@ -13,9 +13,9 @@
 int main(int argc, char* argv[]) {
 
   // physics parameters
-  unsigned int spatL = 16;
+  unsigned int spatL = 64;
   unsigned int nEv = 32;
-  unsigned int nDil = 32;
+  unsigned int nDil = 64;
 
   unsigned int dimx = 64;
   unsigned int dimd1 = 16;
