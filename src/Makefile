@@ -7,9 +7,9 @@ KERNEL_DPC=1
 #RESULT_CHECK=1
 #REPVEC=1
 
-DPCPP_CXX= dpcpp
-DPCPP_CXXFLAGS= -O3 -std=c++20 -fmax-errors=3 
-DPCPP_CXXFLAGS+= -fsycl -fsycl-targets=spir64_gen -Xs "-device pvc -options -cl-intel-enable-auto-large-GRF-mode"
+DPCPP_CXX= icpx
+DPCPP_CXXFLAGS= -O3 -std=c++20 -fmax-errors=3
+DPCPP_CXXFLAGS+= -fsycl #-fsycl-targets=spir64_gen -Xsycl-target-backend=spir64_gen "-device skl" #-Xs "-device pvc -options -cl-intel-enable-auto-large-GRF-mode"
 DPCPP_CXXFLAGS+= -qmkl
 DPCPP_CXXFLAGS+= -DDP # -DDP for double precision
 DPCPP_CXXFLAGS+= -DREPEAT=2 # Number of repetitions + 1 warm up
