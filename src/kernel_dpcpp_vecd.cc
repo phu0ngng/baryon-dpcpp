@@ -5,14 +5,15 @@
 
 #include <exception>
 
-BaryonKernelDPC::BaryonKernelDPC()
+BaryonKernelDpcVecD::BaryonKernelDpcVecD()
   : nMom(0), d_momBuf(nullptr), d_evBuf(nullptr){ 
 
     resetTimers(); 
 
     // DPCPP - Selecting device
     try{
-      sycl::queue q{sycl::gpu_selector{}, {sycl::property::queue::in_order(), sycl::property::queue::enable_profiling()}};
+      sycl::queue q{sycl::gpu_selector_v};
+      //sycl::queue q{sycl::gpu_selector{}, {sycl::property::queue::in_order(), sycl::property::queue::enable_profiling()}};
     }
     catch (sycl::exception const &e) {
       std::cout << "NO requested device is FOUND\n";
@@ -21,7 +22,7 @@ BaryonKernelDPC::BaryonKernelDPC()
   // Check if the queue is still working
   std::cout << "Device: " << q.get_device().get_info< sycl::info::device::name >() << "\n";
   auto maxWorkGroupSize = q.get_device().get_info< sycl::info::device::max_work_group_size >();
-
+/*
   std::cout << "Device Info: " << std::endl;
   std::cout << "--- Max Workgroup Size: " << maxWorkGroupSize << "\n";
 
@@ -34,21 +35,21 @@ BaryonKernelDPC::BaryonKernelDPC()
 
   auto local_mem_size = q.get_device().get_info< sycl::info::device::local_mem_size >();
   std::cout << "--- Local Memory Size: " << local_mem_size << "\n";
-  
+*/
   }
 
-BaryonKernelDPC::~BaryonKernelDPC() {
+BaryonKernelDpcVecD::~BaryonKernelDpcVecD() {
   sycl::free(d_evBuf, q);
   sycl::free(d_momBuf, q);
 }
 
 
-void BaryonKernelDPC::resetTimers() {
+void BaryonKernelDpcVecD::resetTimers() {
   timeReconst = 0.;
   timeComp = 0.;
 }
 
-void BaryonKernelDPC::setMomentumSet(const std::set<Momentum>& momSet) {
+void BaryonKernelDpcVecD::setMomentumSet(const std::set<Momentum>& momSet) {
   // regenerate momentum fields if necessary
   unsigned int nSites = Layout::sitesOnNode();
 
@@ -71,7 +72,7 @@ void BaryonKernelDPC::setMomentumSet(const std::set<Momentum>& momSet) {
 }
 
 
-void BaryonKernelDPC::readEV(int _nEv,
+void BaryonKernelDpcVecD::readEV(int _nEv,
     const std::function<const LatticeColorVector&(int)>& readFunc) {
   unsigned int nSites = Layout::sitesOnNode();
 
@@ -99,7 +100,7 @@ void BaryonKernelDPC::readEV(int _nEv,
   delete[] evBuf;
 }
 
-multi4d <cmplx> BaryonKernelDPC::apply(
+multi4d <cmplx> BaryonKernelDpcVecD::apply(
     VectorChunkDpcD1* coeffs1,
     VectorChunkDpcD2* coeffs2,
     VectorChunkDpcD3* coeffs3, 
@@ -140,13 +141,13 @@ multi4d <cmplx> BaryonKernelDPC::apply(
   auto transA = oneapi::mkl::transpose::trans;
   auto transB = oneapi::mkl::transpose::nontrans;
   using oneapi::mkl::blas::row_major::gemm;
-  for (unsigned int iBlockD = 0; iBlockD < nBlockD1; iBlockD++)
+  for (unsigned int iBlockD = 0; iBlockD < nBlockD1; iBlockD++){
       gemm(q, transA, transB, nSites * 3, DPC_BLOCK_D1,  nEv, alpha, d_evBuf, 3 * nSites, &d_coeffs1[iBlockD * nEv].d[0], DPC_BLOCK_D1, beta, &d_q1[iBlockD * nSites].c0[0], DPC_BLOCK_D1);
   for (unsigned int iBlockD = 0; iBlockD < nBlockD2; iBlockD++)
       gemm(q, transA, transB, nSites * 3, DPC_BLOCK_D2,  nEv, alpha, d_evBuf, 3 * nSites, &d_coeffs2[iBlockD * nEv].d[0], DPC_BLOCK_D2, beta, &d_q2[iBlockD * nSites].c0[0], DPC_BLOCK_D2);
   for (unsigned int iBlockD = 0; iBlockD < nBlockD3; iBlockD++)
       gemm(q, transA, transB, nSites * 3, DPC_BLOCK_D3,  nEv, alpha, d_evBuf, 3 * nSites, &d_coeffs3[iBlockD * nEv].d[0], DPC_BLOCK_D3, beta, &d_q3[iBlockD * nSites].c0[0], DPC_BLOCK_D3);
-
+  }
   q.wait();
   timeReconst = bulova.time();
 
@@ -159,7 +160,7 @@ multi4d <cmplx> BaryonKernelDPC::apply(
   q.wait();
   bulova.reset();
   auto ev = q.submit([&](auto &h){
-    constexpr unsigned int nMom = 33; // TODO: having nMom compiler time known
+    constexpr unsigned int nMom = 32; // TODO: having nMom compiler time known
     auto d_momBuf = this->d_momBuf;
 
     h.template parallel_for<class Baryon>(sycl::nd_range<3>{global, local}, [=] (sycl::nd_item<3> it)
@@ -239,7 +240,7 @@ multi4d <cmplx> BaryonKernelDPC::apply(
   return retArr;
 }
 
-std::vector<std::pair<std::string, double>> BaryonKernelDPC::getTimings() const {
+std::vector<std::pair<std::string, double>> BaryonKernelDpcVecD::getTimings() const {
   return {
     {"reconstruct fields", timeReconst},
       {"computation", timeComp}

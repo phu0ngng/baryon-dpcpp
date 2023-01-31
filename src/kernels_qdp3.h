@@ -143,7 +143,7 @@ struct BaryonKernelCpuRef {
 };
 
 
-struct BaryonKernelDPC {
+struct BaryonKernelDpcVecD {
 
   // physics parameters
   int nEv, nMom;
@@ -152,11 +152,11 @@ struct BaryonKernelDPC {
   cmplx* d_momBuf;
   cmplx* d_evBuf;
 
-  double timeReconst, timeComp, timeBuffer;
+  double timeReconst, timeComp;
 
-  BaryonKernelDPC();
+  BaryonKernelDpcVecD();
 
-  ~BaryonKernelDPC();
+  ~BaryonKernelDpcVecD();
 
   void resetTimers();
 
@@ -175,4 +175,36 @@ struct BaryonKernelDPC {
 
   // DPCPP
   sycl::queue q;
+};
+
+struct BaryonKernelDpcVecX {
+
+    // physics parameters
+    int nEv, nMom;
+
+    // data buffers
+    cmplx* d_momBuf;
+    cmplx* d_evBuf;
+
+    double timeReconst, timeComp;
+
+    BaryonKernelDpcVecX();
+
+    ~BaryonKernelDpcVecX();
+
+    void resetTimers();
+
+    void setMomentumSet(const std::set<Momentum>& _momSet);
+
+    void readEV(int _nEv,
+            const std::function<const LatticeColorVector&(int)>& readFunc);
+
+    multi4d<cmplx> apply(const multi2d<cmplx>& coeffs1,
+            const multi2d<cmplx>& coeffs2,
+            const multi2d<cmplx>& coeffs3);
+
+    std::vector<std::pair<std::string, double>> getTimings() const;
+
+    // DPCPP
+    sycl::queue q;
 };

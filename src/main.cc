@@ -13,9 +13,9 @@
 int main(int argc, char* argv[]) {
 
   // physics parameters
-  unsigned int spatL = 64;
+  unsigned int spatL = 32;
   unsigned int nEv = 32;
-  unsigned int nDil = 64;
+  unsigned int nDil = 32;
 
   unsigned int dimx = 64;
   unsigned int dimd1 = 16;
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
     std::make_tuple(0,-2,0),
     std::make_tuple(2,0,0)
 
-      ,std::make_tuple(-2,0,0)
+//      ,std::make_tuple(-2,0,0)
   };
 
   const unsigned int nMom = momSet.size();
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
   double warmUpTime, sumTime;
   std::vector<std::pair<std::string, double>> timeDetail;
 
-#if defined(KERNEL_CPU_OPT) || defined(KERNEL_CPU_REF)
+#if defined(KERNEL_CPU_OPT) || defined(KERNEL_CPU_REF) || defined(KERNEL_DPC_VECX)
   multi2d<cmplx> coeff1(nDil, nEv);
   multi2d<cmplx> coeff2(nDil, nEv);
   multi2d<cmplx> coeff3(nDil, nEv);
@@ -157,7 +157,7 @@ int main(int argc, char* argv[]) {
   else std::cout << "FAIL" << std::endl;
 #endif
 
-#ifdef KERNEL_DPC
+#ifdef KERNEL_DPC_VECD
   unsigned int nBlockD1 = nDil / DPC_BLOCK_D1;
   unsigned int nBlockD2 = nDil / DPC_BLOCK_D2;
   unsigned int nBlockD3 = nDil / DPC_BLOCK_D3;
@@ -171,22 +171,22 @@ int main(int argc, char* argv[]) {
   init_coeff_dpc<VectorChunkDpcD3>(coeff3_dpc, nEv, nBlockD3, DPC_BLOCK_D3);
 
   swatch.reset();
-  BaryonKernelDPC kernelDPC;
-  kernelDPC.setMomentumSet(momSet);
+  BaryonKernelDpcVecD kernelDpcVecD;
+  kernelDpcVecD.setMomentumSet(momSet);
 
-  kernelDPC.readEV(nEv, [&evList](int iEv) -> const LatticeColorVector& { return evList[iEv]; });
-  std::cout << "BaryonKernelDPC++ setup time = " << swatch.time()<<"\n";
+  kernelDpcVecD.readEV(nEv, [&evList](int iEv) -> const LatticeColorVector& { return evList[iEv]; });
+  std::cout << "BaryonkernelDpcVecD++ setup time = " << swatch.time()<<"\n";
 
   multi4d<cmplx> resultDPC(nMom, nDil, nDil, nDil);
-  resultDPC = kernelDPC.apply(coeff1_dpc, coeff2_dpc, coeff3_dpc, nDil, nDil, nDil);
-  warmUpTime = kernelDPC.getTimings()[1].second;
+  resultDPC = kernelDpcVecD.apply(coeff1_dpc, coeff2_dpc, coeff3_dpc, nDil, nDil, nDil);
+  warmUpTime = kernelDpcVecD.getTimings()[1].second;
   std::cout << "BaryonConstr Time (warm up) = " << warmUpTime <<"\n" << std::endl;
   sumTime = 0.0;
   for (int i = 1; i < REPEAT; i++)
   {
-    kernelDPC.resetTimers();
-    resultDPC = kernelDPC.apply(coeff1_dpc, coeff2_dpc, coeff3_dpc, nDil, nDil, nDil);
-    auto timeDetail = kernelDPC.getTimings()[1].second;
+    kernelDpcVecD.resetTimers();
+    resultDPC = kernelDpcVecD.apply(coeff1_dpc, coeff2_dpc, coeff3_dpc, nDil, nDil, nDil);
+    auto timeDetail = kernelDpcVecD.getTimings()[1].second;
     std::cout << "BaryonConstr Time = "<< timeDetail <<"\n";
     sumTime += timeDetail;
   }
@@ -199,7 +199,33 @@ int main(int argc, char* argv[]) {
   delete[] coeff3_dpc;
 #endif
 
-#if defined(RESULT_CHECK) && defined(KERNEL_DPC) && defined(KERNEL_CPU_REF)
+#ifdef KERNEL_DPC_VECX
+  swatch.reset();
+  BaryonKernelDpcVecX kernelDpcVecX;
+  kernelDpcVecX.setMomentumSet(momSet);
+
+  kernelDpcVecX.readEV(nEv, [&evList](int iEv) -> const LatticeColorVector& { return evList[iEv]; });
+  std::cout << "BaryonkernelDpcVecX++ setup time = " << swatch.time()<<"\n";
+
+  multi4d<cmplx> resultDPC(nMom, nDil, nDil, nDil);
+  resultDPC = kernelDpcVecX.apply(coeff1, coeff2, coeff3);
+  warmUpTime = kernelDpcVecX.getTimings()[1].second;
+  std::cout << "BaryonConstr Time (warm up) = " << warmUpTime <<"\n" << std::endl;
+  sumTime = 0.0;
+  for (int i = 1; i < REPEAT; i++)
+  {
+    kernelDpcVecX.resetTimers();
+    resultDPC = kernelDpcVecX.apply(coeff1, coeff2, coeff3);
+    auto timeDetail = kernelDpcVecX.getTimings()[1].second;
+    std::cout << "BaryonConstr Time = "<< timeDetail <<"\n";
+    sumTime += timeDetail;
+  }
+  if (sumTime == 0.0) sumTime = warmUpTime;
+  else sumTime /= (REPEAT - 1);
+  std::cout << "Average Time = " << sumTime << "\n" << std::endl;
+#endif
+
+#if defined(RESULT_CHECK) && (defined(KERNEL_DPCD) || defined(KERNEL_DPC_VECX)) && defined(KERNEL_CPU_REF)
   std::cout << "Result check: ";
   if (check_results(resultDPC, resultCpuRef)) std::cout << "PASS \n \n" << std::endl;
   else std::cout << "FAIL \n \n" << std::endl;
