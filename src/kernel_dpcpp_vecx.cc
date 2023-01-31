@@ -209,8 +209,6 @@ multi4d<cmplx> BaryonKernelDpcVecX::apply(
       {
         d_retArr[(iM +  local_x) * n1* n2 * n3 + g_linearId] = tmp[iM/BLOCK_X];
       }
-      sg.barrier();
-      //sycl::group_barrier(g);
 
     });
   });
