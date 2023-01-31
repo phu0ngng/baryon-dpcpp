@@ -76,6 +76,7 @@ void BaryonKernelDpcVecX::readEV(int _nEv,
 	  aRef = readFunc(iEv);
   }
   q.memcpy(d_evBuf, &evBuf[0].c0 , nEv * nSites * 3 * sizeof(cmplx));
+  q.wait();
   delete[] evBuf;
 }
 
@@ -157,7 +158,7 @@ multi4d<cmplx> BaryonKernelDpcVecX::apply(
         size_t local_d3 = it.get_local_id(1);
 
         auto nMom_per_item = nM / BLOCK_X;
-        cmplx tmp[1];
+        cmplx tmp[2];
 
         for (int i = 0; i < nMom_per_item; i++)
           tmp[i] = 0.0;
@@ -199,13 +200,14 @@ multi4d<cmplx> BaryonKernelDpcVecX::apply(
           temp_sum = d_momBuf[iM * nSites + xBlock + local_x] * singlet;
           temp_sum =  sycl::reduce_over_group(sg, temp_sum, sycl::plus<>());
 
-          if (local_x == (iM % BLOCK_X)) tmp[static_cast<int>(iM / BLOCK_X)] += temp_sum;
+          //if (local_x == (iM % BLOCK_X)) tmp[static_cast<int>(iM / BLOCK_X)] += temp_sum;
+          if (local_x == (iM % BLOCK_X)) tmp[iM / BLOCK_X] += temp_sum;
         }
       }
 
       for (int iM = 0; iM < nM; iM+= BLOCK_X)
       {
-        d_retArr[(iM + local_x) * n1* n2 * n3 + g_linearId] = tmp[iM % BLOCK_X];
+        d_retArr[(iM +  local_x) * n1* n2 * n3 + g_linearId] = tmp[iM/BLOCK_X];
       }
       sg.barrier();
       //sycl::group_barrier(g);
