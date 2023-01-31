@@ -13,9 +13,9 @@
 int main(int argc, char* argv[]) {
 
   // physics parameters
-  unsigned int spatL = 32;
+  unsigned int spatL = 16;
   unsigned int nEv = 32;
-  unsigned int nDil = 32;
+  unsigned int nDil = 64;
 
   unsigned int dimx = 64;
   unsigned int dimd1 = 16;
@@ -61,8 +61,43 @@ int main(int argc, char* argv[]) {
     std::make_tuple(0,2,0),
     std::make_tuple(0,-2,0),
     std::make_tuple(2,0,0)
-
+// 32
 //      ,std::make_tuple(-2,0,0)
+    ,std::make_tuple(0,0,0),
+    std::make_tuple(0,0,1),
+    std::make_tuple(0,0,-1),
+    std::make_tuple(0,1,0),
+    std::make_tuple(0,-1,0),
+    std::make_tuple(1,0,0),
+    std::make_tuple(-1,0,0),
+    std::make_tuple(0,1,1),
+
+    std::make_tuple(0,1,-1),
+    std::make_tuple(0,-1,1),
+    std::make_tuple(0,-1,-1),
+    std::make_tuple(1,0,1),
+    std::make_tuple(1,0,-1),
+    std::make_tuple(-1,0,1),
+    std::make_tuple(-1,0,-1),
+    std::make_tuple(1,1,0)
+
+      ,std::make_tuple(1,-1,0),
+    std::make_tuple(-1,1,0),
+    std::make_tuple(-1,-1,0),
+    std::make_tuple(1,1,1),
+    std::make_tuple(1,1,-1),
+    std::make_tuple(1,-1,1),
+    std::make_tuple(-1,1,1),
+    std::make_tuple(-1,-1,1),
+
+    std::make_tuple(-1,1,-1),
+    std::make_tuple(1,-1,-1),
+    std::make_tuple(-1,-1,-1),
+    std::make_tuple(0,0,2),
+    std::make_tuple(0,0,-2),
+    std::make_tuple(0,2,0),
+    std::make_tuple(0,-2,0),
+    std::make_tuple(2,0,0)
   };
 
   const unsigned int nMom = momSet.size();
@@ -225,7 +260,7 @@ int main(int argc, char* argv[]) {
   std::cout << "Average Time = " << sumTime << "\n" << std::endl;
 #endif
 
-#if defined(RESULT_CHECK) && (defined(KERNEL_DPCD) || defined(KERNEL_DPC_VECX)) && defined(KERNEL_CPU_REF)
+#if defined(RESULT_CHECK) && (defined(KERNEL_DPC_VECD) || defined(KERNEL_DPC_VECX)) && defined(KERNEL_CPU_REF)
   std::cout << "Result check: ";
   if (check_results(resultDPC, resultCpuRef)) std::cout << "PASS \n \n" << std::endl;
   else std::cout << "FAIL \n \n" << std::endl;
